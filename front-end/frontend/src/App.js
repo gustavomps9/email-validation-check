@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import EmailVerifier from './components/EmailVerifier'; // Importar o teu componente
+import EmailVerifier from './components/EmailVerifier';
 
 function App() {
   return (
