@@ -1,29 +1,30 @@
 import React, { useState } from 'react';
 
-const EmailChecker = () => {
+const EmailVerifier = () => {
   const [email, setEmail] = useState('');
   const [result, setResult] = useState('');
 
   const handleCheckEmail = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/emails/check', {
+      const response = await fetch('http://localhost:5000/api/emails/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email }), // Envia apenas o e-mail
       });
       const data = await response.json();
-      setResult(data.result); // 'failed' or 'passed'
+      console.log(data);
+      setResult(data.result);
     } catch (error) {
+      console.error('Error checking email:', error);
       setResult('Error checking email');
     }
   };
 
   return (
     <div>
-      <h1>Email Checker</h1>
       <form onSubmit={handleCheckEmail}>
         <input
           type="email"
@@ -39,4 +40,4 @@ const EmailChecker = () => {
   );
 };
 
-export default EmailChecker;
+export default EmailVerifier;
