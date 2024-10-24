@@ -12,11 +12,19 @@ const EmailVerifier = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }), // Envia apenas o e-mail
+        body: JSON.stringify({ email }), 
       });
+
       const data = await response.json();
       console.log(data);
-      setResult(data.result);
+      
+      // Verifica se a resposta foi bem-sucedida
+      if (response.ok) {
+        setResult(data.result); // 'passed' se for bem-sucedido
+      } else {
+        // Apenas exibe o resultado sem o erro
+        setResult('failed');
+      }
     } catch (error) {
       console.error('Error checking email:', error);
       setResult('Error checking email');

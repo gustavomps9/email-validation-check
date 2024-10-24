@@ -16,6 +16,8 @@
     "express": "^4.21.1",
     "googleapis": "^144.0.0",
     "mongoose": "^8.7.2",
-    "validator": "^13.12.0"
+    "validator": "^13.12.0",
+    "whois": "^2.14.2",
+    "whois-json": "^2.0.4"
   }
 }

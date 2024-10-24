@@ -1,20 +1,29 @@
-// controllers/emailController.js
 const emailService = require('../services/emailService');
 const { getGmailAccountFromCode } = require('../googleAuth/googleAuth');
 
-const verifyEmail = async (req, res) => {
-  const { email } = req.body;
+  const verifyEmail = async (req, res) => {
+    const { email } = req.body;
+  
+    try {
+      // Verifica o e-mail
+      const result = await emailService.verifyEmail(email);
+      console.log('Email verification passed:', result.email);
+      return res.json({ result: 'passed' });
+    } catch (error) {
+      console.error('Error verifying email:', error.message);
+  
+      if (error.message === 'Domain is blacklisted or invalid') {
+        return res.json({ result: 'failed', error: error.message });
+      }
 
-  try {
-    // Verifica o e-mail
-    const result = await emailService.verifyEmail(email);
-    console.log('Email verification passed:', result.email);
-    return res.json({ result: 'passed' });
-  } catch (error) {
-    console.error('Error verifying email:', error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
+      if (error.message === 'Domain does not exist') {
+        return res.json({ result: 'failed', error: error.message });
+      }
+      
+      return res.status(400).json({ error: error.message });
+    }
+  };
+  
 
 const addTrustedEmail = async (req, res) => {
   const { email } = req.body;

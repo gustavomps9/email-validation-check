@@ -1,6 +1,32 @@
-// services/emailService.js
 const Email = require('../models/emailModel');
 const validator = require('validator');
+const dns = require('dns');
+const whois = require('whois');
+
+const checkDomainExistence = async (domain) => {
+  return new Promise((resolve, reject) => {
+    // Verificar com WHOIS
+    whois.lookup(domain, (err, data) => {
+      if (err) {
+        reject(new Error('WHOIS lookup failed'));
+      } else {
+        // Se houver dados, o domínio existe
+        if (data && data.includes('Domain Name:')) {
+          // Verificar registros MX
+          dns.resolveMx(domain, (err, addresses) => {
+            if (err || addresses.length === 0) {
+              resolve(false); // Não existem registros MX
+            } else {
+              resolve(true); // O domínio existe e tem registros MX
+            }
+          });
+        } else {
+          resolve(false);
+        }
+      }
+    });
+  });
+};
 
 const verifyEmail = async (email) => {
   // Valida o formato do e-mail
@@ -8,18 +34,28 @@ const verifyEmail = async (email) => {
     throw new Error('Invalid email format');
   }
 
-  // Extrai o domínio do email
-  const domain = email.split('@')[1];
+ // Extrai o domínio do email
+ const domain = email.split('@')[1];
 
-  // Verifica se o domínio está na lista negra
-  const blacklistedDomain = await Email.findOne({ email: new RegExp(domain, 'i'), isBlacklisted: true });
-  if (blacklistedDomain) {
-    throw new Error('Domain is blacklisted or invalid');
-  }
+ // Verificar se o domínio está na blacklist
+ const blacklistedDomain = await Email.findOne({ email: new RegExp(domain, 'i'), isBlacklisted: true });
+ if (blacklistedDomain) {
+   throw new Error('Domain is blacklisted or invalid');
+ }
 
-  return { email, isValid: true };
+ const trustedDomain = await Email.findOne({ email: new RegExp(domain, 'i'), isTrusted: true });
+ if (trustedDomain) {
+   return { email, isValid: true }; // Retorna como válido se estiver na lista confiável
+ }
+
+ // Se o domínio não estiver na blacklist nem na lista confiável, verificar se existe
+ const exists = await checkDomainExistence(domain);
+ if (!exists) {
+   throw new Error('Domain does not exist');
+ }
+
+ return { email, isValid: true };
 };
-
 const addTrustedEmail = async (email) => {
   // Valida o formato do e-mail
   if (!validator.isEmail(email)) {
