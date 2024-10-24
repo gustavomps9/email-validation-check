@@ -10,14 +10,26 @@ const checkDomainExistence = async (domain) => {
       if (err) {
         reject(new Error('WHOIS lookup failed'));
       } else {
-        // Se houver dados, o domínio existe
+        // Se houver dados do domínio
         if (data && data.includes('Domain Name:')) {
+          const creationDateMatch = data.match(/Creation Date: (.+)/); // ou Registered On, dependendo do formato
+          if (creationDateMatch) {
+            const creationDate = new Date(creationDateMatch[1]);
+            const currentDate = new Date();
+            const domainAgeInDays = (currentDate - creationDate) / (1000 * 60 * 60 * 24);
+            
+            // Se o domínio foi criado nos últimos 30 dias, falha
+            if (domainAgeInDays < 30) {
+              resolve(false);
+            }
+          }
+
           // Verificar registros MX
           dns.resolveMx(domain, (err, addresses) => {
             if (err || addresses.length === 0) {
               resolve(false); // Não existem registros MX
             } else {
-              resolve(true); // O domínio existe e tem registros MX
+              resolve(true); // O domínio existe e tem registos MX
             }
           });
         } else {
@@ -27,6 +39,7 @@ const checkDomainExistence = async (domain) => {
     });
   });
 };
+
 
 const verifyEmail = async (email) => {
   // Valida o formato do e-mail

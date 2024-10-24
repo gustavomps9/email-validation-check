@@ -1,17 +1,25 @@
 const express = require('express');
 const { 
   verifyEmail, 
-  addTrustedEmail, 
+  verifyEmailDomain,
+  verifyEmailAccountAge, 
+  addTrustedEmail,
   addBlacklistedDomain,
   getAllEmails, 
   updateTrustedEmail, 
-  deleteTrustedEmail 
+  deleteTrustedEmail
 } = require('../controllers/emailController');
 
 const router = express.Router();
 
 // Rota para verificar e-mails
 router.post('/verify', verifyEmail);
+
+// Rota para verificar domínios de e-mail
+router.post('/verify-domain', verifyEmailDomain);
+
+// Rota para verificar a idade da conta de e-mail(gmail)
+router.get('/account-age', verifyEmailAccountAge);
 
 // Rota para adicionar e-mails confiáveis
 router.post('/trusted', addTrustedEmail);

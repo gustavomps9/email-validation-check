@@ -1,18 +1,48 @@
-.App {
+/* styles.css */
+
+body {
+  font-family: cursive; 
+  background: linear-gradient(to right, #f0f4f8, #e0e7ff); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+div {
+  background: white; 
+  border-radius: 10px; 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
+  padding: 20px;
   text-align: center;
-  margin: 50px;
 }
 
 input {
+  border: 2px solid #4f46e5; 
+  border-radius: 5px; 
   padding: 10px;
-  margin-right: 10px;
+  width: 80%;
+  margin: 10px 0;
+  font-size: 16px;
 }
 
 button {
+  background-color: #4f46e5; 
+  color: white;
+  border: none;
+  border-radius: 5px;
   padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s; 
+}
+
+button:hover {
+  background-color: #3730a3; 
 }
 
 p {
-  font-size: 18px;
-  margin-top: 20px;
+  font-size: 20px; 
+  margin-top: 10px;
 }

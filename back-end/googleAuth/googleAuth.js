@@ -1,81 +1,60 @@
-const dotenv = require('dotenv');
-// Carrega as variáveis de ambiente
-dotenv.config();
-
+const express = require('express');
 const { google } = require('googleapis');
+const open = require('open');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
-console.log('Client ID:', process.env.GOOGLE_CLIENT_ID);
-console.log('Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
-console.log('Redirect URI:', process.env.GOOGLE_REDIRECT_URI);
+const app = express();
+const PORT = 5001;
 
+// Carregar as credenciais do OAuth 2.0
+const CLIENT_ID = '';
+const CLIENT_SECRET = '';
+const REDIRECT_URI = '';
+
+
+// Cria um cliente OAuth 2.0
 const oAuth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID, 
-  process.env.GOOGLE_CLIENT_SECRET, 
-  process.env.GOOGLE_REDIRECT_URI 
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
 );
 
-// Gera o URL de autorização
-const getGoogleAuthUrl = () => {
-  const scopes = [
-    'https://www.googleapis.com/auth/gmail.readonly',
-  ];
+const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 
-  return oAuth2Client.generateAuthUrl({
+// Função para redirecionar o utilizador para o login do Google
+app.get('/auth', (req, res) => {
+  const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: scopes,
+    scope: SCOPES,
   });
-};
 
-// Função auxiliar para obter a data da conta do Gmail
-const getGmailAccountFromCode = async (code) => {
+  res.redirect(authUrl);
+});
+
+// Recebe o código de autenticação e troca por tokens
+app.get('/oauth2callback', async (req, res) => {
+  const code = req.query.code;
   try {
-    console.log('Received authorization code:', code);
-
-    // Obtém os tokens usando o código de autorização
     const { tokens } = await oAuth2Client.getToken(code);
-    console.log('Tokens received:', tokens); // Log para verificar os tokens recebidos
-
     oAuth2Client.setCredentials(tokens);
-    console.log('OAuth2 client credentials set.'); // Confirmação de que as credenciais foram definidas
 
-    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-
-    // Obtém o primeiro email da conta
-    const response = await gmail.users.messages.list({
-      userId: 'me',
-      maxResults: 1,
-      q: '',
-    });
-
-    // Valida a resposta da API para garantir que há mensagens disponíveis
-    if (!response.data || !response.data.messages || response.data.messages.length === 0) {
-      console.error('No messages found or unexpected response structure:', response.data);
-      throw new Error('No emails found in the account.');
-    }
-
-    const messageId = response.data.messages[0].id;
-    console.log('First message ID:', messageId); // Log para verificar o ID da mensagem
-
-    const message = await gmail.users.messages.get({
-      userId: 'me',
-      id: messageId,
-    });
-
-    console.log('Message details:', message.data); // Log para verificar os detalhes da mensagem
-
-    const emailDate = new Date(parseInt(message.data.internalDate));
-    console.log('First email date:', emailDate);
-    return { emailDate };
+    // Guarda os tokens num ficheiro chamado 'token.txt' no ambiente de trabalho
+    const desktopPath = path.join(os.homedir(), 'Desktop', 'token.txt');
+    fs.writeFileSync(desktopPath, JSON.stringify(tokens));
+    res.send('Authentication successful! Tokens saved to Desktop as token.txt.');
   } catch (error) {
-    console.error('Error fetching Gmail account information:', error);
-    throw error;
+    console.error('Error retrieving access token', error);
+    res.status(500).send('Authentication failed');
   }
-};
+});
 
+// Inicia o servidor e abre a página de autenticação
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+  open(`http://localhost:${PORT}/auth`); // Abre automaticamente a página de autenticação
+});
 
-
-// Exporta as funções relevantes
-module.exports = {
-  getGoogleAuthUrl,
-  getGmailAccountFromCode,
-};
+// Exporta o cliente OAuth para reutilização
+module.exports = { oAuth2Client };
