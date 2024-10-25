@@ -28,7 +28,7 @@ router.post('/trusted', addTrustedEmail);
 router.post('/blacklist', addBlacklistedDomain);
 
 // Rota para obter todos os e-mails confiáveis
-router.get('/trusted', getAllEmails);
+router.get('/emails', getAllEmails);
 
 // Rota para atualizar um e-mail confiável
 router.put('/trusted/:id', updateTrustedEmail);
