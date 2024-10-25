@@ -23,7 +23,7 @@ const oAuth2Client = new google.auth.OAuth2(
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 
-// Função para redirecionar o utilizador para o login do Google
+// Redireciona o utilizador para o login do Google
 app.get('/auth', (req, res) => {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',

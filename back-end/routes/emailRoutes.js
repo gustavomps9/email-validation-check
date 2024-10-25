@@ -33,7 +33,7 @@ router.get('/trusted', getAllEmails);
 // Rota para atualizar um e-mail confiável
 router.put('/trusted/:id', updateTrustedEmail);
 
-// Rota para deletar um e-mail confiável
+// Rota para eliminar um e-mail confiável
 router.delete('/trusted/:id', deleteTrustedEmail);
 
 module.exports = router;

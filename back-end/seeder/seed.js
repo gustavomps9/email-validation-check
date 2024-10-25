@@ -30,13 +30,13 @@ const domains = [
 ];
 
 async function insertEmails() {
-  await Email.deleteMany(); // Limpa a coleção antes de inserir novos dados
+  await Email.deleteMany(); 
   
   const emailPromises = domains.map(({ email, isBlacklisted }) => {
     const newEmail = new Email({ email, isBlacklisted });
     return newEmail.save()
-      .then(() => console.log(`Email ${email} salvo com sucesso!`))
-      .catch((error) => console.error(`Erro ao salvar o e-mail ${email}:`, error.message));
+      .then(() => console.log(`Email ${email} guardado com sucesso!`))
+      .catch((error) => console.error(`Erro ao guardar o e-mail ${email}:`, error.message));
   });
 
   try {
@@ -50,10 +50,10 @@ async function insertEmails() {
 async function main() {
   try {
     await mongoose.connect(process.env.MONGODB_URI); // Conexão com MongoDB
-    console.log('Conectado ao MongoDB');
+    console.log('Connected to MongoDB');
     await insertEmails();
   } catch (error) {
-    console.error('Erro ao conectar ao MongoDB:', error.message);
+    console.error('Error to connect MongoDB:', error.message);
   } finally {
     mongoose.connection.close(); // Fecha a conexão
   }
